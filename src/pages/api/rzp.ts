@@ -2,7 +2,7 @@ import Razorpay from 'razorpay';
 import cuid from 'cuid';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { donationsBase, PaymentStatus, fundingsBase } from '../../services/airtable';
+import { donationsBase, PaymentStatus, fundingsBase, paymentsBase } from '../../services/airtable';
 import { getFinalAmount } from '../../utils';
 
 const RZP_KEY = process.env.NODE_ENV === 'development' ? process.env.RZP_TEST_KEY : process.env.RZP_LIVE_KEY;
@@ -18,7 +18,18 @@ const razorpay = new Razorpay(rzpCredentials);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { email, name, amount, phone, paymentMethod = 'Razorpay', campaign } = req.body;
+    const {
+      email,
+      name,
+      amount,
+      hours_spent,
+      hours_spent_cost,
+      tip,
+      phone,
+      paymentMethod = 'Razorpay',
+      campaign,
+      isPayment,
+    } = req.body;
     const id = cuid();
     const data: { id: string; status: PaymentStatus } = await razorpay.orders.create({
       amount: getFinalAmount(Number(amount)) * 100, // in paise
@@ -30,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         phone,
         name,
         campaign,
+        isPayment,
       },
     });
     if (campaign) {
@@ -44,7 +56,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           payment_method: paymentMethod,
           status: PaymentStatus.created,
           order_id: data.id,
-          created_at: Date.now(),
+          created_at: new Date().toISOString(),
+        },
+        { typecast: true }
+      );
+    } else if (isPayment) {
+      await paymentsBase.create(
+        {
+          id,
+          name,
+          email,
+          phone,
+          hours_spent: Number(hours_spent),
+          hours_spent_cost: Number(hours_spent_cost),
+          tip: Number(tip),
+          paid_amount: Number(amount),
+          payment_method: paymentMethod,
+          status: PaymentStatus.created,
+          order_id: data.id,
+          created_at: new Date().toISOString(),
         },
         { typecast: true }
       );
@@ -59,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           payment_method: paymentMethod,
           status: PaymentStatus.created,
           order_id: data.id,
-          created_at: Date.now(),
+          created_at: new Date().toISOString(),
         },
         { typecast: true }
       );

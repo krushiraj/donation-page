@@ -5,9 +5,13 @@ import { getFinalAmount } from '../utils';
 interface RzpData {
   name: string;
   email: string;
+  hours_spent: number;
+  hours_spent_cost: number;
+  tip: number;
   amount: number;
   phone: string;
   campaign?: string;
+  isPayment?: boolean;
 }
 
 async function getOrderId(data: RzpData) {
@@ -48,7 +52,7 @@ export async function openRzp(data: RzpData) {
         image: CODERPLEX_LOGO,
         handler: async (res: RzpResponse) => {
           try {
-            await updateStatus({ ...res, status: 'captured', campaign: data.campaign });
+            await updateStatus({ ...res, status: 'captured', campaign: data.campaign, isPayment: data.isPayment });
             resolve();
           } catch (error) {
             reject(error);
@@ -60,6 +64,7 @@ export async function openRzp(data: RzpData) {
               razorpay_order_id: order.id,
               status: 'failed',
               campaign: data.campaign,
+              isPayment: data.isPayment,
             });
             reject(new Error(`Payment widget is closed without completing payment. Please try again!`));
           },

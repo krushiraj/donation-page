@@ -5,7 +5,7 @@ import { EmojiIcon } from '../Icons/common';
 
 export const HomeContent = () => {
   return (
-    <div className="py-4 pb-6 pb-20 md:pb-0">
+    <div className="py-4 pb-6 pb-20 md:pb-0 xs:max-w-xs sm:xs-auto sm:max-w-md sm:mx-auto">
       <p className="px-6 mb-4 md:mb-6 text-sm md:text-base font-medium leading-relaxed">
         <span className="text-base font-bold text-purple-700">Coderplex Foundation</span> is a registered non-profit
         organization that is working towards improving the state of tech in India.
@@ -28,6 +28,12 @@ export const HomeContent = () => {
         <Button href="/donate">
           <EmojiIcon />
           <span className="inline-block ml-2">Make A Donation</span>
+        </Button>
+      </div>
+      <div className="p-4 flex justify-center">
+        <Button href="/space">
+          <EmojiIcon />
+          <span className="inline-block ml-2">Pay for Hackerspace</span>
         </Button>
       </div>
     </div>

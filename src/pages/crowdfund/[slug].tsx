@@ -1,6 +1,8 @@
 import React from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
+import snarkdown from 'md.js';
+
 import { NextPageContext, NextComponentType } from 'next';
 import { SEO } from '../../components/SEO';
 import { PaymentForm } from '../../components/common/PaymentForm';
@@ -23,7 +25,7 @@ const CampaignPage: NextPage = ({ initialData, slug }) => {
   const { data } = useSWR<CampaignWithFundings>(`/api/campaigns/${slug}`, fetch, { initialData });
   return (
     <>
-      <SEO title={`${data.title} | Campaign | Coderplex Foundation`} description={data.description} />
+      <SEO title={`${data.title} | Campaign | Coderplex Foundation`} description={data.meta_description} />
       <div className="pb-20 md:pb-0 md:max-w-5xl mx-auto">
         <header>
           <Link href="/crowdfund">
@@ -35,7 +37,10 @@ const CampaignPage: NextPage = ({ initialData, slug }) => {
         <div className="p-4 pt-0 lg:flex">
           <div className="md:mx-2 md:mr-8 lg:flex-1">
             <h1 className="text-2xl mb-2 font-medium text-gray-800">{data.title}</h1>
-            <p className="text-lg mb-4 text-gray-700 leading-relaxed">{data.description}</p>
+            <div
+              className="text-lg mb-4 text-gray-700 leading-relaxed markdown"
+              dangerouslySetInnerHTML={{ __html: snarkdown(data.description) }}
+            />
             <CampaignProgress campaign={data} />
             {data.is_active && (
               <div className="mt-6 md:mt-0">
